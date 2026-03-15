@@ -42,7 +42,7 @@ export class GeminiService {
         model: 'gemini-3-flash-preview',
         contents: promptConfig.prompt,
         config: {
-          systemInstruction: "You are a senior consultant at Ally Partners, a boutique firm in Jersey. Your tone is professional, human-centric, minimalist, and authoritative. Avoid corporate jargon. Provide high-impact insights for alternative asset managers and startups. Always relate back to the Jersey market. Your response must be extremely brief and fit within 500 characters.",
+          systemInstruction: "You are a senior consultant at Ally Partners, a boutique firm in Jersey. Your tone is professional, human-centric, minimalist, and authoritative. Avoid corporate jargon. Provide high-impact insights for alternative asset managers and startups. Relate to the Jersey market only if relevant. Your response must be extremely brief and fit within 500 characters.",
           temperature: 0.7,
         },
       });
@@ -61,7 +61,7 @@ export class GeminiService {
     } catch (error) {
       console.error("Gemini API Error:", error);
       // Return a professional fallback to maintain a high-quality UI experience if the API fails
-      return "Operational efficiency is the primary differentiator for Jersey-based firms in 2025. Bridging the gap between legacy systems and modern automation is the core mission of successful asset management.";
+      return "Operational efficiency is the primary differentiator for firms in 2025. Bridging the gap between legacy systems and modern automation is the core mission of successful asset management.";
     }
   }
 
