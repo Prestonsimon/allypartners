@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 interface ContactPageProps {
   onBackClick: (e: React.MouseEvent) => void;
@@ -8,15 +8,55 @@ interface ContactPageProps {
 const ContactPage: React.FC<ContactPageProps> = ({ onBackClick }) => {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 1. Form State
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    firm: '',
+    message: ''
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!executeRecaptcha) {
+      alert("Security check not yet ready. Please try again.");
+      return;
+    }
+
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      // 2. Execute Invisible ReCAPTCHA
+      const token = await executeRecaptcha('contact_form');
+
+      // 3. Send to Cloudflare Function
+      const response = await fetch('/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          recaptchaToken: token
+        }),
+      });
+
+      if (response.ok) {
+        setSubmitted(true);
+      } else {
+        const err = await response.json();
+        alert(err.error || "Failed to send message.");
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      alert("An error occurred. Please check your connection.");
+    } finally {
       setLoading(false);
-      setSubmitted(true);
-    }, 1500);
+    }
   };
 
   if (submitted) {
@@ -79,6 +119,9 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBackClick }) => {
                   <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 ml-1">Full Name</label>
                   <input 
                     required 
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
                     type="text" 
                     placeholder="John Doe"
                     className="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-700 focus:outline-none focus:border-blue-500/50 transition-colors"
@@ -88,6 +131,9 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBackClick }) => {
                   <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 ml-1">Email Address</label>
                   <input 
                     required 
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
                     type="email" 
                     placeholder="john@firm.com"
                     className="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-700 focus:outline-none focus:border-blue-500/50 transition-colors"
@@ -97,6 +143,9 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBackClick }) => {
               <div>
                 <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 ml-1">Firm / Fund Name</label>
                 <input 
+                  name="firm"
+                  value={formData.firm}
+                  onChange={handleChange}
                   type="text" 
                   placeholder="Asset Management Ltd."
                   className="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-700 focus:outline-none focus:border-blue-500/50 transition-colors"
@@ -106,23 +155,21 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBackClick }) => {
                 <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 ml-1">How can we help?</label>
                 <textarea 
                   required 
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
                   rows={4}
                   placeholder="Tell us about your operational challenges..."
                   className="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-700 focus:outline-none focus:border-blue-500/50 transition-colors resize-none"
                 ></textarea>
               </div>
 
-              {/* Security Check Section (ReCAPTCHA Placeholder) */}
+              {/* Secure reCAPTCHA attribution */}
               <div className="pt-2 pb-4">
-                <div className="bg-zinc-950/50 border border-dashed border-white/10 rounded-xl p-6 flex flex-col items-center justify-center text-center">
-                  <div className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-3">Security Verification</div>
-                  {/* RECAPTCHA INTEGRATION POINT */}
-                  <div id="recaptcha-container" className="min-h-[78px] flex items-center justify-center">
-                    <div className="text-zinc-700 text-[11px] italic">
-                      ReCAPTCHA component will be initialized here.
-                    </div>
-                  </div>
-                </div>
+                <p className="text-[10px] text-zinc-500 text-center leading-relaxed">
+                  Secured by Google reCAPTCHA.<br/>
+                  <a href="https://policies.google.com/privacy" className="hover:text-blue-500 transition-colors">Privacy</a> & <a href="https://policies.google.com/terms" className="hover:text-blue-500 transition-colors">Terms</a> apply.
+                </p>
               </div>
               
               <button
