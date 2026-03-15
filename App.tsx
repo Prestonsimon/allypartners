@@ -41,7 +41,7 @@ const App: React.FC = () => {
   // ONE SINGLE RETURN BLOCK
   return (
     <GoogleReCaptchaProvider 
-      reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
+      reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "YOUR_ACTUAL_SITE_KEY_FOR_TESTING"}
     >
       <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col">
         <Navbar 
