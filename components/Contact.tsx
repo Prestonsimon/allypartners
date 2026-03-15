@@ -43,11 +43,11 @@ const Contact: React.FC<ContactProps> = ({ onContactClick, onPrivacyClick, onTer
           <div className="flex gap-8 text-[13px] text-zinc-500 font-semibold tracking-wide">
             <button onClick={onPrivacyClick} className="hover:text-blue-500 transition-colors">Privacy</button>
             <button onClick={onTermsClick} className="hover:text-blue-500 transition-colors">Terms</button>
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500 transition-colors">LinkedIn</a>
+            <a href="https://www.linkedin.com/company/ally-partners" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500 transition-colors">LinkedIn</a>
           </div>
 
           <div className="text-xs font-medium text-zinc-600 tracking-wider">
-            &copy; {new Date().getFullYear()} Ally Partners Limited. Jersey, Channel Islands.
+            &copy; {new Date().getFullYear()} Ally Limited. Jersey, Channel Islands.
           </div>
         </div>
       </div>

@@ -26,7 +26,7 @@ const Terms: React.FC<TermsProps> = ({ onBackClick }) => {
           <section>
             <h2 className="text-xl font-bold text-white mb-4 border-b border-white/5 pb-2">1. Acceptance of Terms</h2>
             <p className="text-zinc-400 leading-relaxed">
-              By accessing or using the website of Ally Partners Limited ("Ally Partners"), you agree to be bound by these Terms of Service and all applicable laws and regulations in Jersey, Channel Islands. If you do not agree with any of these terms, you are prohibited from using or accessing this site.
+              By accessing or using the website of Ally Limited ("Ally Partners"), you agree to be bound by these Terms of Service and all applicable laws and regulations in Jersey, Channel Islands. If you do not agree with any of these terms, you are prohibited from using or accessing this site.
             </p>
           </section>
 
@@ -50,7 +50,7 @@ const Terms: React.FC<TermsProps> = ({ onBackClick }) => {
           <section>
             <h2 className="text-xl font-bold text-white mb-4 border-b border-white/5 pb-2">3. Intellectual Property</h2>
             <p className="text-zinc-400 leading-relaxed">
-              The materials contained in this website are protected by applicable copyright and trademark law. The "Ally Partners" name, logo, and the custom operational roadmaps presented are the exclusive property of Ally Partners Limited.
+              The materials contained in this website are protected by applicable copyright and trademark law. The "Ally Partners" name, logo, and the custom operational roadmaps presented are the exclusive property of Ally Limited.
             </p>
           </section>
 

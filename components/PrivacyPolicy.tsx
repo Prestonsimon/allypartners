@@ -27,10 +27,10 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBackClick, onContactCli
           <section>
             <h2 className="text-xl font-bold text-white mb-4 border-b border-white/5 pb-2">1. Introduction</h2>
             <p className="text-zinc-400 leading-relaxed mb-4">
-              Your privacy is important to us. It is Ally Partners Limited's policy to respect your privacy regarding any information we may collect from you across our website, <span className="text-blue-400">ally-partners.com</span>, and other sites we own and operate.
+              Your privacy is important to us. It is Ally Limited's policy to respect your privacy regarding any information we may collect from you across our website, <span className="text-blue-400">ally-partners.com</span>, and other sites we own and operate.
             </p>
             <p className="text-zinc-400 leading-relaxed">
-              Ally Partners Limited is registered in Jersey, Channel Islands. We are committed to protecting your personal data and being transparent about what information we hold about you.
+              Ally Limited is registered in Jersey, Channel Islands. We are committed to protecting your personal data and being transparent about what information we hold about you.
             </p>
           </section>
 
