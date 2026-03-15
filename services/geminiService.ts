@@ -1,12 +1,9 @@
-
-import { GoogleGenAI } from "@google/genai";
 import { INSIGHT_PROMPTS } from "../constants";
 
 export class GeminiService {
   /**
-   * Fetches market insight for a specific predefined prompt ID.
+   * Fetches market insight via Cloudflare Function (Backend).
    * Implements daily caching in localStorage to minimize API calls.
-   * strictly enforces that only suggested prompts can be run.
    */
   async getMarketInsight(id: string): Promise<string> {
     // 1. Validate ID against predefined prompts
@@ -29,41 +26,35 @@ export class GeminiService {
         this.clearOldCaches(today);
       }
     } catch (e) {
-      // Storage access can fail in some environments
+      // Storage access can fail
     }
 
-    // 3. Fetch from Gemini
+    // 3. Fetch from Backend (Cloudflare Function)
     try {
-      // The API client must be initialized with the exact syntax below
-      // Assume process.env.API_KEY is pre-configured and valid
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: promptConfig.prompt,
-        config: {
-          systemInstruction: "You are a senior consultant at Ally Partners, a boutique firm in Jersey. Your tone is professional, human-centric, minimalist, and authoritative. Avoid corporate jargon. Provide high-impact insights for alternative asset managers and startups. Relate to the Jersey market only if relevant. Your response must be extremely brief and fit within 500 characters.",
-          temperature: 0.7,
-        },
+      const response = await fetch('/api/market-insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: promptConfig.prompt })
       });
 
-      const resultText = response.text || "Strategic operational roadmaps are currently being synthesized. Please check back shortly.";
+      if (!response.ok) throw new Error('API request failed');
+
+      const data = await response.json();
+      const resultText = data.text || "Strategic operational roadmaps are currently being synthesized.";
       
+      // Save to cache
       try {
         if (typeof localStorage !== 'undefined') {
           localStorage.setItem(cacheKey, resultText);
         }
-      } catch (e) {
-        // Silently ignore storage issues
-      }
+      } catch (e) {}
       
       return resultText;
     } catch (error) {
-      console.error("Gemini API Error:", error);
-      // Return a professional fallback to maintain a high-quality UI experience if the API fails
-      return "Operational efficiency is the primary differentiator for firms in 2025. Bridging the gap between legacy systems and modern automation is the core mission of successful asset management.";
+      console.error("Fetch Error:", error);
+      return "Operational efficiency is the primary differentiator for firms in 2026. Bridging the gap between legacy systems and modern automation is the core mission.";
     }
-  }
+  } // <--- Added this missing closing brace
 
   private clearOldCaches(currentDate: string) {
     if (typeof localStorage === 'undefined') return;
