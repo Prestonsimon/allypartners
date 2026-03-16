@@ -1,26 +1,28 @@
-
 import React from 'react';
+// 1. Import the specific Lucide icons
+import { Lightbulb, PieChart, Construction, ArrowRight } from 'lucide-react';
 
 interface AllyApproachProps {
   onContactClick: (e: React.MouseEvent) => void;
 }
 
 const AllyApproach: React.FC<AllyApproachProps> = ({ onContactClick }) => {
+  // 2. Updated the pillar objects to use the Component names instead of strings
   const pillars = [
     {
       title: 'Innovation-First',
       description: 'We prioritize modern, scalable technology that works for your team, not against it.',
-      icon: 'fa-lightbulb'
+      icon: Lightbulb
     },
     {
       title: 'Data-Driven',
       description: 'Decisions are backed by clear operational metrics and market intelligence.',
-      icon: 'fa-chart-pie'
+      icon: PieChart
     },
     {
       title: 'Roll up our sleeves',
       description: 'We don\'t just deliver slide decks. We execute alongside you in the trenches.',
-      icon: 'fa-person-digging'
+      icon: Construction
     }
   ];
 
@@ -35,23 +37,30 @@ const AllyApproach: React.FC<AllyApproachProps> = ({ onContactClick }) => {
               True partnership requires more than external advice. We act as an extension of your internal team, sharing your goals and navigating complexity as one unit.
             </p>
             <div className="space-y-10 mb-12">
-              {pillars.map((pillar) => (
-                <div key={pillar.title} className="flex gap-5">
-                  <div className="flex-shrink-0 w-14 h-14 bg-blue-600/10 border border-blue-500/20 rounded-xl flex items-center justify-center text-blue-500">
-                    <i className={`fa-solid ${pillar.icon} text-xl`}></i>
+              {pillars.map((pillar) => {
+                // 3. Extract the icon component
+                const Icon = pillar.icon;
+                return (
+                  <div key={pillar.title} className="flex gap-5">
+                    <div className="flex-shrink-0 w-14 h-14 bg-blue-600/10 border border-blue-500/20 rounded-xl flex items-center justify-center text-blue-500">
+                      {/* 4. Render as a React Component */}
+                      <Icon size={24} strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white text-lg mb-1">{pillar.title}</h4>
+                      <p className="text-zinc-500 text-sm leading-relaxed">{pillar.description}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-white text-lg mb-1">{pillar.title}</h4>
-                    <p className="text-zinc-500 text-sm leading-relaxed">{pillar.description}</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <button 
               onClick={onContactClick}
               className="text-white font-bold text-sm uppercase tracking-widest flex items-center gap-3 group"
             >
-              Partner with us <i className="fa-solid fa-arrow-right text-blue-500 group-hover:translate-x-1 transition-transform"></i>
+              Partner with us 
+              {/* 5. Fixed the CTA arrow */}
+              <ArrowRight size={18} className="text-blue-500 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
           <div className="w-full md:w-1/2 bg-zinc-900 border border-white/5 rounded-[40px] p-6 md:p-10 relative overflow-hidden">

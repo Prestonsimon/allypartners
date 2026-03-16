@@ -1,7 +1,7 @@
 export async function onRequest(context) {
   const { request, env } = context;
 
-  // 1. Handle Safari's "Pre-flight" check (MANDATORY)
+  // 1. Handle Pre-flight
   if (request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
@@ -14,7 +14,10 @@ export async function onRequest(context) {
 
   // 2. Reject anything that isn't a POST
   if (request.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
+    return new Response(JSON.stringify({ error: "Method Not Allowed" }), { 
+      status: 405,
+      headers: { "Content-Type": "application/json" }
+    });
   }
 
   try {
@@ -26,12 +29,19 @@ export async function onRequest(context) {
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         systemInstruction: {
-          parts: [{ text: "ou are a senior consultant at Ally Partners, Jersey. Tone: Professional, minimalist, authoritative. Max 500 characters." }]
+          parts: [{ text: "You are a senior consultant at Ally Partners, Jersey. Tone: Professional, minimalist, authoritative. Max 500 characters." }]
         }
       })
     });
 
     const data = await response.json();
+    
+    // 3. Defensive Check: Ensure the AI actually returned a candidate
+    if (!data.candidates || data.candidates.length === 0) {
+      console.error("Gemini Error:", data);
+      throw new Error("No AI candidates returned");
+    }
+
     const resultText = data.candidates[0].content.parts[0].text;
 
     return new Response(JSON.stringify({ text: resultText }), {
@@ -41,6 +51,10 @@ export async function onRequest(context) {
       }
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: "AI Failed" }), { status: 500 });
+    console.error("Request Error:", error.message);
+    return new Response(JSON.stringify({ error: error.message || "AI Synthesis Failed" }), { 
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
   }
 }

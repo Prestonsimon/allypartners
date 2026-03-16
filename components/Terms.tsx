@@ -19,7 +19,7 @@ const Terms: React.FC<TermsProps> = ({ onBackClick }) => {
 
         <header className="mb-16">
           <h1 className="text-5xl font-extrabold text-white tracking-tighter mb-4">Terms of Service</h1>
-          <p className="text-zinc-500 font-mono text-xs uppercase tracking-[0.2em]">Last Updated: June 2024</p>
+          <p className="text-zinc-500 font-mono text-xs uppercase tracking-[0.2em]">Last Updated: June 2025</p>
         </header>
 
         <div className="prose prose-invert max-w-none space-y-12">
