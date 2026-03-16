@@ -1,7 +1,7 @@
 export async function onRequest(context) {
   const { request, env } = context;
 
-  // 1. Handle Pre-flight
+  // 1. Handle Pre-flight (CORS) - Required for browser security
   if (request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
@@ -12,7 +12,7 @@ export async function onRequest(context) {
     });
   }
 
-  // 2. Reject anything that isn't a POST
+  // 2. Security Check: Only allow POST requests
   if (request.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method Not Allowed" }), { 
       status: 405,
@@ -20,29 +20,53 @@ export async function onRequest(context) {
     });
   }
 
+  // 3. Configuration Check: Verify API Key is present in Cloudflare
+  if (!env.GEMINI_API_KEY) {
+    return new Response(JSON.stringify({ error: "API Key not configured in environment" }), { status: 500 });
+  }
+
   try {
     const { prompt } = await request.json();
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${env.GEMINI_API_KEY}`, {
+    // Use the 2026 workhorse model: Gemini 3 Flash
+    const modelId = "gemini-3-flash-preview"; 
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${env.GEMINI_API_KEY}`;
+
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
+        contents: [{
+          role: "user",
+          parts: [{ text: prompt }]
+        }],
         systemInstruction: {
-          parts: [{ text: "It's 2026 and you are a senior consultant at Ally Partners, Jersey. Tone: Professional, minimalist, authoritative. Max 500 characters." }]
+          parts: [{ text: "You are a senior consultant at Ally Partners, Jersey. Tone: Professional, minimalist, authoritative. Max 500 characters. Current year: 2026." }]
+        },
+        generationConfig: {
+          maxOutputTokens: 400,
+          temperature: 0.65
         }
       })
     });
 
     const data = await response.json();
-    
-    // 3. Defensive Check: Ensure the AI actually returned a candidate
-    if (!data.candidates || data.candidates.length === 0) {
-      console.error("Gemini Error:", data);
-      throw new Error("No AI candidates returned");
+
+    // 4. Handle API-level errors (e.g., quota, invalid key)
+    if (data.error) {
+      console.error("Gemini API Error:", data.error.message);
+      return new Response(JSON.stringify({ error: data.error.message }), { 
+        status: response.status,
+        headers: { "Content-Type": "application/json" }
+      });
     }
 
-    const resultText = data.candidates[0].content.parts[0].text;
+    // 5. Extract text safely
+    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!resultText) {
+      throw new Error("No intelligence synthesis returned from AI.");
+    }
 
     return new Response(JSON.stringify({ text: resultText }), {
       headers: { 
@@ -50,9 +74,13 @@ export async function onRequest(context) {
         "Access-Control-Allow-Origin": "*" 
       }
     });
+
   } catch (error) {
-    console.error("Request Error:", error.message);
-    return new Response(JSON.stringify({ error: error.message || "AI Synthesis Failed" }), { 
+    console.error("Request Failure:", error.message);
+    return new Response(JSON.stringify({ 
+      error: "Strategic synthesis failed.", 
+      details: error.message 
+    }), { 
       status: 500,
       headers: { "Content-Type": "application/json" }
     });
