@@ -33,22 +33,27 @@ export async function onRequest(context) {
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${env.GEMINI_API_KEY}`;
 
     const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          role: "user",
-          parts: [{ text: prompt }]
-        }],
-        systemInstruction: {
-          parts: [{ text: "You are a senior consultant at Ally Partners, Jersey. Tone: Professional, minimalist, authoritative. Max 500 characters. Current year: 2026." }]
-        },
-        generationConfig: {
-          maxOutputTokens: 400,
-          temperature: 0.65
-        }
-      })
-    });
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    contents: [{
+      role: "user",
+      parts: [{ text: prompt }]
+    }],
+    systemInstruction: {
+      parts: [{ 
+        text: "You are a senior strategic consultant at Ally Partners, Jersey. " +
+              "Provide authoritative, high-impact insights for alternative asset managers. " +
+              "Your response should be 2-3 complete, sophisticated sentences. " +
+              "Never stop mid-sentence. Ensure the thought is fully synthesized." 
+      }]
+    },
+    generationConfig: {
+      maxOutputTokens: 800, // Increased from 400 to prevent cut-offs
+      temperature: 0.7,     // Slightly higher for better flow
+    }
+  })
+});
 
     const data = await response.json();
 
