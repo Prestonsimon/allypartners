@@ -31,13 +31,13 @@ export const SERVICES: ServiceItem[] = [
 export const INSIGHT_PROMPTS: InsightPrompt[] = [
   {
     id: 'executive-brief',
-    label: '2025 Executive Outlook',
-    prompt: 'Provide a strategic quote on the future of alternative asset management in Jersey for 2025. Focus on the shift to AI-enabled workflows. Keep it under 500 characters.'
+    label: '2026 Executive Outlook',
+    prompt: 'Provide a strategic quote on the future of alternative asset management in Jersey for 2026. Focus on the shift to AI-enabled workflows. Keep it under 500 characters.'
   },
   {
     id: 'ai-efficiency',
     label: 'The AI Alpha',
-    prompt: 'Describe the "AI Alpha" for boutique firms in 2025. How do small teams use automation to compete? Limit to 500 characters.'
+    prompt: 'Describe the "AI Alpha" for boutique firms in 2026. How do small teams use automation to compete? Limit to 500 characters.'
   },
   {
     id: 'jersey-edge',
