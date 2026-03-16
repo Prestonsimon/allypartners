@@ -1,112 +1,130 @@
 import React, { useState, useEffect } from 'react';
 import { INSIGHT_PROMPTS } from '../constants';
-import { geminiService } from '../services/geminiApi';
-import { Sparkles, BarChart3, ChevronRight, Loader2 } from 'lucide-react';
+import { InsightResult } from '../types';
+import { geminiService } from '../services/geminiApi'; // Updated to use the new bridge service
 
-// 1. Define the interface OUTSIDE the component
+interface MarketInsightsProps {
+  onContactClick: (e: React.MouseEvent) => void;
+}
+
+// 1. Define the interface to ensure TypeScript knows the structure of your constants
 interface InsightPrompt {
   id: string;
-  title: string;
+  label: string; // Using label as per your original code
   prompt: string;
 }
 
-const MarketInsights: React.FC = () => {
-  // 2. Use the "Double Cast" here to perfectly align with your constants
+const MarketInsights: React.FC<MarketInsightsProps> = ({ onContactClick }) => {
+  // 2. Cast constants to the interface
   const prompts = (INSIGHT_PROMPTS as unknown) as InsightPrompt[];
   
-  // 3. Initialize state safely
-  const [activeTab, setActiveTab] = useState(prompts.length > 0 ? prompts[0].id : '');
-  const [insight, setInsight] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
+  const [result, setResult] = useState<InsightResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchInsight = async (id: string) => {
-    if (!id) return;
+  const handlePromptClick = async (id: string) => {
+    if (loading && selectedPromptId === id) return;
+    
+    setSelectedPromptId(id);
     setLoading(true);
+    setError(null);
+    
     try {
-      const result = await geminiService.getMarketInsight(id);
-      setInsight(result);
-    } catch (error) {
-      setInsight("Strategic synthesis temporarily unavailable. Focus on core operational integrity remains paramount.");
+      const insightText = await geminiService.getMarketInsight(id);
+      
+      setResult({
+        text: insightText,
+        timestamp: new Date()
+      });
+    } catch (err) {
+      console.error("Failed to fetch insight:", err);
+      setError("Unable to refresh live insights. Using latest strategic brief.");
+      setResult({
+        text: "Efficiency in alternative asset management is no longer a luxury; it is the primary differentiator for 2026. Jersey-based firms are increasingly leading the shift toward fully automated middle-office operations.",
+        timestamp: new Date()
+      });
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchInsight(activeTab);
-  }, [activeTab]);
+    const initialPrompt = prompts[0];
+    if (initialPrompt) {
+      handlePromptClick(initialPrompt.id);
+    }
+  }, []);
 
   return (
-    <section id="insights" className="py-24 bg-zinc-900/50 border-y border-white/5">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-          <div className="max-w-2xl">
-            <div className="flex items-center gap-2 text-blue-500 mb-4">
-              <Sparkles size={18} />
-              <span className="text-xs font-bold uppercase tracking-widest">AI Market Intelligence</span>
-            </div>
-            <h2 className="text-4xl font-bold text-white mb-6">Operational Insights</h2>
-            <p className="text-zinc-400 text-lg leading-relaxed">
-              Real-time strategic synthesis for alternative asset managers. Select a focus area to generate an operational roadmap perspective.
-            </p>
-          </div>
+    <section id="insights" className="py-24 bg-zinc-950 text-white relative overflow-hidden">
+      {/* Background radial glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_100%)]"></div>
+      
+      <div className="max-w-5xl mx-auto px-6 relative z-10">
+        <div className="text-center mb-12">
+          <h2 className="text-blue-500 font-bold text-[10px] uppercase tracking-[0.3em] mb-4">Intelligence Engine</h2>
+          <h3 className="text-3xl font-bold tracking-tight">Real-time Strategic Summaries.</h3>
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-12">
-          {/* Sidebar Tabs */}
-          <div className="lg:col-span-4 space-y-3">
-            {prompts.map((prompt) => (
+        <div className="flex flex-col items-center">
+          {/* Minimalist prompt selector */}
+          <div className="flex flex-wrap justify-center gap-2 mb-12 p-1.5 bg-zinc-900 rounded-2xl border border-white/5">
+            {prompts.map((item) => (
               <button
-                key={prompt.id}
-                onClick={() => setActiveTab(prompt.id)}
-                className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between group ${
-                  activeTab === prompt.id
-                    ? 'bg-blue-600 border-blue-500 text-white shadow-xl shadow-blue-900/20'
-                    : 'bg-zinc-900/50 border-white/5 text-zinc-400 hover:border-white/20 hover:bg-zinc-800'
-                }`}
+                key={item.id}
+                onClick={() => handlePromptClick(item.id)}
+                disabled={loading}
+                className={`px-5 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all ${
+                  selectedPromptId === item.id 
+                    ? 'bg-blue-600 text-white shadow-lg' 
+                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
+                } disabled:opacity-50`}
               >
-                <span className="font-bold tracking-tight">{prompt.title}</span>
-                <ChevronRight 
-                  size={18} 
-                  className={`transition-transform duration-300 ${
-                    activeTab === prompt.id ? 'translate-x-1' : 'opacity-0 group-hover:opacity-100'
-                  }`} 
-                />
+                {item.label}
               </button>
             ))}
           </div>
 
-          {/* Insight Display Area */}
-          <div className="lg:col-span-8">
-            <div className="bg-zinc-950 border border-white/10 rounded-[32px] p-8 md:p-12 min-h-[400px] relative overflow-hidden flex flex-col justify-center">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 blur-[100px] -z-10"></div>
-              
-              {loading ? (
-                <div className="flex flex-col items-center justify-center text-zinc-500 gap-4 animate-in fade-in duration-500">
-                  <Loader2 className="animate-spin text-blue-500" size={40} />
-                  <p className="text-sm font-medium tracking-widest uppercase">Synthesizing Strategy...</p>
+          {/* Insight Result - Original Quote Style */}
+          <div className="w-full max-w-4xl min-h-[400px] relative flex flex-col items-center justify-center text-center px-6">
+            {loading ? (
+              <div className="flex flex-col items-center animate-pulse">
+                <div className="flex gap-1.5 mb-6">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
                 </div>
-              ) : (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                  <div className="flex items-center gap-3 mb-8">
-                    <div className="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center text-blue-500">
-                      <BarChart3 size={20} />
-                    </div>
-                    <span className="text-zinc-500 font-bold text-xs uppercase tracking-widest">
-                      2026 Operational Perspective
-                    </span>
-                  </div>
-                  <div className="text-zinc-300 text-xl md:text-2xl leading-relaxed font-light italic">
-                    "{insight}"
-                  </div>
-                  <div className="mt-12 pt-8 border-t border-white/5">
-                    <p className="text-zinc-600 text-xs leading-relaxed max-w-md italic">
-                      Disclaimer: AI-generated insights are designed for strategic brainstorming and should be validated against specific regulatory and operational frameworks.
-                    </p>
-                  </div>
+                <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest">Synthesizing Brief...</p>
+              </div>
+            ) : result ? (
+              <div className="flex flex-col items-center transition-all duration-700">
+                {/* Large decorative quotation mark */}
+                <div className="text-blue-500/10 text-9xl font-serif absolute top-0 left-1/2 -translate-x-1/2 -z-10 select-none">“</div>
+                
+                <blockquote className="text-2xl md:text-3xl font-medium text-zinc-100 leading-tight mb-8 max-w-2xl italic">
+                  {result.text}
+                </blockquote>
+                
+                {error && <p className="text-[10px] text-zinc-600 mb-6 font-bold uppercase tracking-widest">{error}</p>}
+                
+                <div className="flex items-center justify-center gap-3 mb-10">
+                  <div className="h-px w-8 bg-zinc-800"></div>
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">
+                    Ally AI Consultant • {result.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                  <div className="h-px w-8 bg-zinc-800"></div>
                 </div>
-              )}
-            </div>
+
+                <button 
+                  onClick={onContactClick}
+                  className="px-8 py-3 bg-zinc-100/5 hover:bg-zinc-100/10 border border-white/10 rounded-xl text-[10px] font-bold text-blue-400 uppercase tracking-widest transition-all group"
+                >
+                  Consult with an Ally 
+                  <span className="inline-block ml-2 transition-transform group-hover:translate-x-1">→</span>
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
