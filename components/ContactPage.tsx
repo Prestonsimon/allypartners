@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+// 1. Import the necessary icons
+import { ArrowLeft, Check, MapPin, Loader2, Send } from 'lucide-react';
 
 interface ContactPageProps {
   onBackClick: (e: React.MouseEvent) => void;
@@ -10,7 +12,6 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBackClick }) => {
   const [loading, setLoading] = useState(false);
   const { executeRecaptcha } = useGoogleReCaptcha();
 
-  // 1. Form State
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -32,10 +33,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBackClick }) => {
     setLoading(true);
 
     try {
-      // 2. Execute Invisible ReCAPTCHA
       const token = await executeRecaptcha('contact_form');
-
-      // 3. Send to Cloudflare Function
       const response = await fetch('/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -64,7 +62,8 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBackClick }) => {
       <div className="min-h-screen pt-32 pb-24 px-6 flex items-center justify-center">
         <div className="max-w-md w-full text-center animate-in fade-in zoom-in-95 duration-700">
           <div className="w-20 h-20 bg-green-500/10 border border-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-8">
-            <i className="fa-solid fa-check text-3xl"></i>
+            {/* 2. Success Check Icon */}
+            <Check size={32} />
           </div>
           <h1 className="text-4xl font-bold text-white mb-4">Message Received.</h1>
           <p className="text-zinc-400 mb-10 leading-relaxed">
@@ -72,9 +71,9 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBackClick }) => {
           </p>
           <button
             onClick={onBackClick}
-            className="text-blue-500 font-bold uppercase tracking-widest text-xs hover:text-white transition-colors"
+            className="flex items-center justify-center mx-auto gap-2 text-blue-500 font-bold uppercase tracking-widest text-xs hover:text-white transition-colors"
           >
-            <i className="fa-solid fa-arrow-left mr-2"></i> Return to Home
+            <ArrowLeft size={14} /> Return to Home
           </button>
         </div>
       </div>
@@ -88,7 +87,8 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBackClick }) => {
           onClick={onBackClick}
           className="group text-zinc-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest flex items-center gap-2 mb-12 outline-none"
         >
-          <i className="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+          {/* 3. Back Arrow Icon */}
+          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
           Back to Overview
         </button>
 
@@ -103,7 +103,8 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBackClick }) => {
             
             <div className="space-y-6">
               <div className="flex gap-4">
-                <div className="text-blue-500 mt-1"><i className="fa-solid fa-location-dot"></i></div>
+                {/* 4. Location Pin Icon */}
+                <div className="text-blue-500 mt-1"><MapPin size={18} /></div>
                 <div>
                   <p className="text-white font-bold text-sm">Jersey Office</p>
                   <p className="text-zinc-500 text-xs tracking-wide">Channel Islands, UK</p>
@@ -164,7 +165,6 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBackClick }) => {
                 ></textarea>
               </div>
 
-              {/* Secure reCAPTCHA attribution */}
               <div className="pt-2 pb-4">
                 <p className="text-[10px] text-zinc-500 text-center leading-relaxed">
                   Secured by Google reCAPTCHA.<br/>
@@ -179,12 +179,14 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBackClick }) => {
               >
                 {loading ? (
                   <>
-                    <i className="fa-solid fa-spinner fa-spin"></i>
+                    {/* 5. Animated Loading Spinner */}
+                    <Loader2 size={18} className="animate-spin" />
                     Sending Request...
                   </>
                 ) : (
                   <>
-                    Submit Inquiry <i className="fa-solid fa-paper-plane text-xs"></i>
+                    {/* 6. Paper Plane Icon */}
+                    Submit Inquiry <Send size={14} />
                   </>
                 )}
               </button>

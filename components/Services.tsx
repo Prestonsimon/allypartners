@@ -1,10 +1,19 @@
-
 import React from 'react';
 import { SERVICES } from '../constants';
+// 1. Import the icons from Lucide
+import { Layers, Cpu, Wand2, Gem, ArrowDown } from 'lucide-react';
 
 interface ServicesProps {
   onContactClick: (e: React.MouseEvent) => void;
 }
+
+// 2. Create a mapping to link your 'icon' strings to the actual Lucide components
+const IconMap: Record<string, React.ElementType> = {
+  'fa-layer-group': Layers,
+  'fa-microchip': Cpu,
+  'fa-wand-magic-sparkles': Wand2,
+  'fa-gem': Gem,
+};
 
 const Services: React.FC<ServicesProps> = ({ onContactClick }) => {
   return (
@@ -21,29 +30,35 @@ const Services: React.FC<ServicesProps> = ({ onContactClick }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-20">
-          {SERVICES.map((service, index) => (
-            <div 
-              key={service.title} 
-              className="group bg-zinc-900/50 p-8 rounded-[32px] border border-white/5 hover:border-blue-500/30 hover:bg-zinc-900 transition-all duration-500 flex flex-col h-full"
-            >
-              <div className="w-14 h-14 bg-zinc-900 border border-white/10 rounded-2xl flex items-center justify-center text-white shadow-sm mb-8 group-hover:bg-blue-600 group-hover:border-blue-600 transition-all duration-300">
-                <i className={`fa-solid ${service.icon} text-xl`}></i>
+          {SERVICES.map((service) => {
+            // 3. Get the correct icon component based on the constant string
+            const IconComponent = IconMap[service.icon] || Layers; 
+
+            return (
+              <div 
+                key={service.title} 
+                className="group bg-zinc-900/50 p-8 rounded-[32px] border border-white/5 hover:border-blue-500/30 hover:bg-zinc-900 transition-all duration-500 flex flex-col h-full"
+              >
+                <div className="w-14 h-14 bg-zinc-900 border border-white/10 rounded-2xl flex items-center justify-center text-white shadow-sm mb-8 group-hover:bg-blue-600 group-hover:border-blue-600 transition-all duration-300">
+                  {/* 4. Render the Lucide Icon instead of <i> */}
+                  <IconComponent size={24} />
+                </div>
+                <h4 className="text-lg font-bold text-white mb-3 tracking-tight group-hover:text-blue-400 transition-colors">
+                  {service.title}
+                </h4>
+                <p className="text-zinc-500 text-sm leading-relaxed mb-8 flex-grow">
+                  {service.description}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {service.tags?.map(tag => (
+                    <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 bg-white/5 border border-white/5 text-zinc-500 rounded-md group-hover:text-blue-500/80 transition-colors">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <h4 className="text-lg font-bold text-white mb-3 tracking-tight group-hover:text-blue-400 transition-colors">
-                {service.title}
-              </h4>
-              <p className="text-zinc-500 text-sm leading-relaxed mb-8 flex-grow">
-                {service.description}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {service.tags?.map(tag => (
-                  <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 bg-white/5 border border-white/5 text-zinc-500 rounded-md group-hover:text-blue-500/80 transition-colors">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="flex justify-center">
@@ -53,7 +68,8 @@ const Services: React.FC<ServicesProps> = ({ onContactClick }) => {
           >
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-zinc-600 group-hover:text-blue-500 transition-colors">Request a Consultation</span>
             <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-zinc-100 group-hover:text-zinc-950 transition-all">
-              <i className="fa-solid fa-arrow-down animate-bounce"></i>
+              {/* 5. Fixed the bounce arrow icon here as well */}
+              <ArrowDown size={20} className="animate-bounce" />
             </div>
           </button>
         </div>

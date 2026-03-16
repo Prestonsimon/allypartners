@@ -1,5 +1,6 @@
-
 import React from 'react';
+// 1. Import the missing icons
+import { ArrowRight, Check } from 'lucide-react';
 
 interface HeroProps {
   onContactClick: (e: React.MouseEvent) => void;
@@ -41,7 +42,9 @@ const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
               onClick={onContactClick}
               className="bg-zinc-100 text-zinc-950 px-12 py-5 rounded-2xl font-bold hover:bg-blue-600 hover:text-white transition-all shadow-xl shadow-zinc-900 flex items-center gap-3 group"
             >
-              Get In Touch <i className="fa-solid fa-arrow-right-long group-hover:translate-x-1 transition-transform"></i>
+              Get In Touch 
+              {/* 2. Fixed Arrow Icon */}
+              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
         </div>
@@ -70,7 +73,8 @@ const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                           step.status === 'active' ? 'bg-zinc-950 border-blue-500 animate-pulse' : 
                           'bg-zinc-950 border-white/10'
                         }`}>
-                          {step.status === 'completed' && <i className="fa-solid fa-check"></i>}
+                          {/* 3. Fixed Check Icon */}
+                          {step.status === 'completed' && <Check size={12} strokeWidth={3} />}
                           {step.status === 'active' && <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>}
                         </div>
                         {idx !== roadmapSteps.length - 1 && (

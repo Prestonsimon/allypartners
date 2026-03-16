@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { INSIGHT_PROMPTS } from '../constants';
 import { InsightResult } from '../types';
