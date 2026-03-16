@@ -1,78 +1,70 @@
-import { INSIGHT_PROMPTS } from "../constants";
+export async function onRequest(context) {
+  const { request, env } = context;
 
-export class GeminiService {
-  /**
-   * Fetches market insight via Cloudflare Function (Backend).
-   * Implements daily caching in localStorage to minimize API calls.
-   */
-  async getMarketInsight(id: string): Promise<string> {
-    // 1. Validate ID against predefined prompts
-    const promptConfig = INSIGHT_PROMPTS.find(p => p.id === id);
-    if (!promptConfig) {
-      console.error(`Unauthorized prompt ID: ${id}`);
-      return "Invalid request. Please select a valid insight category.";
-    }
+  // 1. Handle Pre-flight (CORS)
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
+    });
+  }
 
-    // 2. Check Daily Cache
-    const today = new Date().toISOString().split('T')[0];
-    const cacheKey = `ally_insight_${id}_${today}`;
-    
-    try {
-      if (typeof localStorage !== 'undefined') {
-        const cachedResponse = localStorage.getItem(cacheKey);
-        if (cachedResponse) {
-          return cachedResponse;
+  if (request.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method Not Allowed" }), { 
+      status: 405, 
+      headers: { "Content-Type": "application/json" } 
+    });
+  }
+
+  try {
+    const { prompt } = await request.json();
+
+    // Use the 2.0 version which is the 2026 stable standard
+    const modelId = "gemini-2.0-flash"; 
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${env.GEMINI_API_KEY}`;
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ 
+          role: "user", 
+          parts: [{ text: `Persona: Senior consultant at Ally Partners, Jersey. Tone: Professional, authoritative. Limit: 500 chars. \n\n Request: ${prompt}` }] 
+        }],
+        generationConfig: {
+          maxOutputTokens: 300,
+          temperature: 0.7
         }
-        this.clearOldCaches(today);
-      }
-    } catch (e) {
-      // Storage access can fail
-    }
+      })
+    });
 
-    // 3. Fetch from Backend (Cloudflare Function)
-    try {
-      const response = await fetch('/api/market-insights', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: promptConfig.prompt })
+    const data = await response.json();
+
+    // If Google returns an error (like a 404 or 400), pass it through to your logs
+    if (data.error) {
+      console.error("Google API Error:", data.error.message);
+      return new Response(JSON.stringify({ error: data.error.message }), { 
+        status: response.status,
+        headers: { "Content-Type": "application/json" }
       });
-
-      if (!response.ok) throw new Error('API request failed');
-
-      const data = await response.json();
-      const resultText = data.text || "Strategic operational roadmaps are currently being synthesized.";
-      
-      // Save to cache
-      try {
-        if (typeof localStorage !== 'undefined') {
-          localStorage.setItem(cacheKey, resultText);
-        }
-      } catch (e) {}
-      
-      return resultText;
-    } catch (error) {
-      console.error("Fetch Error:", error);
-      return "Operational efficiency is the primary differentiator for firms in 2026. Bridging the gap between legacy systems and modern automation is the core mission.";
     }
-  } // <--- Added this missing closing brace
 
-  private clearOldCaches(currentDate: string) {
-    if (typeof localStorage === 'undefined') return;
-    try {
-      const keysToRemove: string[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key?.startsWith('ally_insight_') && !key.endsWith(currentDate)) {
-          keysToRemove.push(key);
-        }
+    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Strategic synthesis complete.";
+
+    return new Response(JSON.stringify({ text: resultText }), {
+      headers: { 
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*" 
       }
-      keysToRemove.forEach(k => {
-        try {
-          localStorage.removeItem(k);
-        } catch(e) {}
-      });
-    } catch (e) {}
+    });
+  } catch (error) {
+    console.error("Pages Function Error:", error.message);
+    return new Response(JSON.stringify({ error: "Internal Server Error", details: error.message }), { 
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
   }
 }
-
-export const geminiService = new GeminiService();
