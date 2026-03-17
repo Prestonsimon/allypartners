@@ -45,9 +45,7 @@ const App: React.FC = () => {
     <GoogleReCaptchaProvider 
       reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LdDS4ssAAAAACGTojifv-I6St3TYlFsq1nDOmdz"}
     >
-<div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col"> 
-// Removed transition-opacity and will-change-transform
-
+      <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col"> 
         <Navbar 
           onContactClick={navigateToContact} 
           onHomeClick={navigateToHome} 
