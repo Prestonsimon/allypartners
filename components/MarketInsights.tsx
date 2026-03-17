@@ -49,18 +49,19 @@ const MarketInsights: React.FC<MarketInsightsProps> = ({ onContactClick }) => {
     }
   };
 useEffect(() => {
-  // Give the mobile browser 1 second to breathe before hitting the API
-  const timer = setTimeout(() => {
-    const initialPrompt = prompts[0];
-    if (initialPrompt) handlePromptClick(initialPrompt.id);
-  }, 1000);
-  
-  return () => clearTimeout(timer);
-}, []);
+  const initialPrompt = prompts[0];
+  // Only auto-run if we haven't loaded anything yet
+  if (initialPrompt && !result && !loading) {
+    handlePromptClick(initialPrompt.id);
+  }
+}, []); // Empty dependency array is CRITICAL here
+
   return (
-    <section id="insights" className="py-24 bg-zinc-950 text-white relative overflow-hidden">
-      {/* Background radial glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_100%)]"></div>
+      <section id="insights" className="py-20 bg-zinc-950 text-white relative">
+  {/* Hide the glow on mobile, show on desktop */}
+  <div className="hidden md:block absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_100%)]"></div>
+  
+  <div className="max-w-5xl mx-auto px-6 relative z-10"></div>
       
       <div className="max-w-5xl mx-auto px-6 relative z-10">
         <div className="text-center mb-12">
@@ -90,15 +91,13 @@ useEffect(() => {
           {/* Insight Result - Original Quote Style */}
           <div className="w-full max-w-4xl min-h-[400px] relative flex flex-col items-center justify-center text-center px-6">
             {loading ? (
-              <div className="flex flex-col items-center animate-pulse">
-                <div className="flex gap-1.5 mb-6">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                </div>
-                <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest">Synthesizing Brief...</p>
-              </div>
-            ) : result ? (
+  <div className="flex flex-col items-center py-10">
+    {/* Simple, low-power loader */}
+    <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+    <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest">Processing...</p>
+  </div>
+) : result ? (
+  // ... result code ...
               <div className="flex flex-col items-center transition-all duration-700">
                 {/* Large decorative quotation mark */}
                 <div className="text-blue-500/10 text-9xl font-serif absolute top-0 left-1/2 -translate-x-1/2 -z-10 select-none">“</div>
