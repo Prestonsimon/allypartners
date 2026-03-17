@@ -1,15 +1,17 @@
 import './index.css';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import AllyApproach from './components/AllyApproach';
 import Services from './components/Services';
-import MarketInsights from './components/MarketInsights';
 import Contact from './components/Contact';
 import ContactPage from './components/ContactPage';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import Terms from './components/Terms';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+
+// 1. Properly Lazy Load MarketInsights (Moved outside the component)
+const MarketInsights = lazy(() => import('./components/MarketInsights'));
 
 const App: React.FC = () => {
   const [view, setView] = useState<'home' | 'contact' | 'privacy' | 'terms'>('home');
@@ -39,7 +41,6 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
-  // ONE SINGLE RETURN BLOCK
   return (
     <GoogleReCaptchaProvider 
       reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LdDS4ssAAAAACGTojifv-I6St3TYlFsq1nDOmdz"}
@@ -57,7 +58,12 @@ const App: React.FC = () => {
               <Hero onContactClick={navigateToContact} />
               <AllyApproach onContactClick={navigateToContact} />
               <Services onContactClick={navigateToContact} />
-              <MarketInsights onContactClick={navigateToContact} />
+              
+              {/* 2. MarketInsights wrapped in Suspense for faster mobile loading */}
+              <Suspense fallback={<div className="h-96 bg-zinc-950 animate-pulse flex items-center justify-center text-zinc-800 text-[10px] uppercase tracking-widest">Loading Intelligence...</div>}>
+                <MarketInsights onContactClick={navigateToContact} />
+              </Suspense>
+
               <Contact 
                 onContactClick={navigateToContact} 
                 onPrivacyClick={navigateToPrivacy}

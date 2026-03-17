@@ -48,14 +48,15 @@ const MarketInsights: React.FC<MarketInsightsProps> = ({ onContactClick }) => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
+useEffect(() => {
+  // Give the mobile browser 1 second to breathe before hitting the API
+  const timer = setTimeout(() => {
     const initialPrompt = prompts[0];
-    if (initialPrompt) {
-      handlePromptClick(initialPrompt.id);
-    }
-  }, []);
-
+    if (initialPrompt) handlePromptClick(initialPrompt.id);
+  }, 1000);
+  
+  return () => clearTimeout(timer);
+}, []);
   return (
     <section id="insights" className="py-24 bg-zinc-950 text-white relative overflow-hidden">
       {/* Background radial glow */}
