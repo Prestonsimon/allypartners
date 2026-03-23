@@ -22,7 +22,7 @@ export const SERVICES: ServiceItem[] = [
   },
   {
     title: 'Pro bono & Advisory',
-    description: 'Guiding and supporting startups with through the initial phases between seed-funding and operational maturity.',
+    description: 'Guiding and supporting startups through the initial phases between seed-funding and operational maturity.',
     icon: 'fa-gem',
     tags: ['Startups', 'Advisory']
   }
